@@ -6,6 +6,8 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 8080;
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -14,33 +16,52 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+pool.on('error', (err) => {
+  console.error('Erro inesperado no pool do banco', err);
+});
+
 app.use(cors());
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 async function initDB() {
-  const client = await pool.connect();
-  try {
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS tasks (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        completed BOOLEAN DEFAULT false,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    console.log("Tabela 'tasks' verificada/criada com sucesso!");
-  } catch (err) {
-    console.error("Erro ao inicializar o banco de dados", err);
-  } finally {
-    client.release();
+  const maxAttempts = 12;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const client = await pool.connect();
+
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS tasks (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          completed BOOLEAN DEFAULT false,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log("Tabela 'tasks' verificada/criada com sucesso!");
+      return;
+    } catch (err) {
+      console.error(`Erro ao inicializar o banco de dados (tentativa ${attempt}/${maxAttempts})`, err);
+      if (attempt === maxAttempts) {
+        throw err;
+      }
+      await sleep(5000);
+    } finally {
+      client.release();
+    }
   }
 }
-initDB();
 
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Healthcheck falhou', err);
+    res.status(500).send('DB unavailable');
+  }
 });
 
 app.get('/api/tasks', async (req, res) => {
@@ -98,6 +119,16 @@ app.delete('/api/tasks/:id', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
+async function startServer() {
+  try {
+    await initDB();
+    app.listen(port, () => {
+      console.log(`Servidor rodando na porta ${port}`);
+    });
+  } catch (err) {
+    console.error('Falha ao iniciar a aplicação', err);
+    process.exit(1);
+  }
+}
+
+startServer();
