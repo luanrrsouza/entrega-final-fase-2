@@ -10,7 +10,7 @@ variable "db_username" {
 
 variable "db_password" {
   description = "Senha do banco de dados (deve ter no mínimo 8 caracteres)"
-  default     = "SenhaSuperSecreta123!"
+  default     = "senha123456"
   sensitive   = true
 }
 
