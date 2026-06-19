@@ -21,5 +21,5 @@ variable "db_name" {
 
 variable "github_repo_url" {
   description = "URL do seu repositório GitHub contendo o código da aplicação (Pasta app)"
-  default     = "https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git"
+  default     = "https://github.com/luanrrsouza/entrega-final-fase-2.git"
 }
