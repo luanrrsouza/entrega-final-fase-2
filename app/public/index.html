@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWS Task Manager</title>
-    <!-- Utilizando Tailwind CSS para um design moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -27,7 +26,6 @@
             <p class="text-sm text-gray-500 font-medium">Rodando no EC2 + RDS PostgreSQL</p>
         </div>
 
-        <!-- Form -->
         <form id="task-form" class="mb-6 flex gap-2">
             <input type="text" id="task-input" required placeholder="O que precisa ser feito?" 
                 class="flex-1 px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-inner">
@@ -37,17 +35,13 @@
             </button>
         </form>
 
-        <!-- Loading State -->
         <div id="loading" class="text-center py-4 hidden">
             <i class="fa-solid fa-circle-notch fa-spin text-2xl text-purple-600"></i>
         </div>
 
-        <!-- Error State -->
         <div id="error-message" class="text-center py-2 text-red-500 font-semibold text-sm hidden"></div>
 
-        <!-- Task List -->
         <ul id="task-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            <!-- As tarefas serão inseridas aqui via JS -->
         </ul>
     </div>
 
@@ -60,7 +54,6 @@
 
         const API_URL = '/api/tasks';
 
-        // Carregar tarefas
         async function loadTasks() {
             try {
                 showLoading(true);
@@ -76,7 +69,6 @@
             }
         }
 
-        // Criar tarefa
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = input.value.trim();
@@ -100,7 +92,6 @@
             }
         });
 
-        // Alternar status
         async function toggleTask(id, completed) {
             try {
                 const response = await fetch(`${API_URL}/${id}`, {
@@ -114,7 +105,6 @@
             }
         }
 
-        // Deletar tarefa
         async function deleteTask(id) {
             try {
                 const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
@@ -124,7 +114,6 @@
             }
         }
 
-        // Renderizar interface
         function renderTasks(tasks) {
             list.innerHTML = '';
             if (tasks.length === 0) {
@@ -176,7 +165,6 @@
                  .replace(/'/g, "&#039;");
         }
 
-        // Init
         loadTasks();
     </script>
 </body>

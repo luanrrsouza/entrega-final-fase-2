@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Configuração do PostgreSQL usando variáveis de ambiente
 const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -18,10 +17,8 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// Serve os arquivos estáticos (Frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Inicializa o banco de dados criando a tabela se não existir
 async function initDB() {
   const client = await pool.connect();
   try {
@@ -42,12 +39,10 @@ async function initDB() {
 }
 initDB();
 
-// Rota de Healthcheck (Útil para o Load Balancer da AWS)
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// API: Listar tarefas
 app.get('/api/tasks', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM tasks ORDER BY created_at DESC');
@@ -58,7 +53,6 @@ app.get('/api/tasks', async (req, res) => {
   }
 });
 
-// API: Criar nova tarefa
 app.post('/api/tasks', async (req, res) => {
   const { title } = req.body;
   if (!title) return res.status(400).json({ error: 'Título é obrigatório' });
@@ -75,7 +69,6 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
-// API: Concluir/Reabrir tarefa
 app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { completed } = req.body;
@@ -93,7 +86,6 @@ app.put('/api/tasks/:id', async (req, res) => {
   }
 });
 
-// API: Excluir tarefa
 app.delete('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
 

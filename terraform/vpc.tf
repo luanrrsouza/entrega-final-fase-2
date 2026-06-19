@@ -1,9 +1,7 @@
-# Buscar zonas de disponibilidade da região
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
-# VPC
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -14,7 +12,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-# Internet Gateway para acesso à internet
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
@@ -23,7 +20,6 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# Subnets Públicas (Para ALB e EC2)
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
@@ -46,7 +42,6 @@ resource "aws_subnet" "public_2" {
   }
 }
 
-# Subnets Privadas (Para o banco de dados RDS)
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.3.0/24"
@@ -67,7 +62,6 @@ resource "aws_subnet" "private_2" {
   }
 }
 
-# Tabela de Roteamento Pública
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -81,7 +75,6 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Associação das Subnets Públicas com a Tabela de Roteamento Pública
 resource "aws_route_table_association" "public_1" {
   subnet_id      = aws_subnet.public_1.id
   route_table_id = aws_route_table.public.id

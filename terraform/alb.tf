@@ -1,4 +1,3 @@
-# Application Load Balancer
 resource "aws_lb" "app_alb" {
   name               = "taskapp-alb"
   internal           = false
@@ -11,7 +10,6 @@ resource "aws_lb" "app_alb" {
   }
 }
 
-# Target Group (Aponta para o Node.js na porta 8080)
 resource "aws_lb_target_group" "app_tg" {
   name     = "taskapp-tg"
   port     = 8080
@@ -32,7 +30,6 @@ resource "aws_lb_target_group" "app_tg" {
   }
 }
 
-# Listener do Load Balancer (Recebe na porta 80 e encaminha pro Target Group)
 resource "aws_lb_listener" "app_listener" {
   load_balancer_arn = aws_lb.app_alb.arn
   port              = "80"
